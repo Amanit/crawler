@@ -8,7 +8,6 @@ WORKDIR /app
 
 COPY poetry.lock pyproject.toml /app/
 
-# RUN POETRY_VIRTUALENVS_IN_PROJECT=true poetry install
 RUN poetry config virtualenvs.create false
 RUN poetry install
 
