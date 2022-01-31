@@ -1,4 +1,5 @@
 import json
+from pymongo import MongoClient
 from typing import Dict, Any
 
 import requests
@@ -37,10 +38,8 @@ def serialize_page_version(page_url: str, page_obj: BeautifulSoup) -> Dict[str, 
     return data
 
 
-def crawl_wiki(
-        page_url: str = "https://ru.wikipedia.org/wiki/Веб-скрейпинг", resp_json: str = "data/wiki_parsing.json"
-):
-    print(f"page_url {page_url}, resp_json {resp_json}")
+def crawl_wiki(db, page_url):
+    print(f"page_url {page_url}")
     response = requests.get(page_url)
     soup = BeautifulSoup(response.text, 'html.parser')
     response_data = {
@@ -49,6 +48,7 @@ def crawl_wiki(
 
     # for every language in most common language list - serialize page
     for language in soup.find_all('a', class_='interlanguage-link-target'):
+        print("Language", language["href"])
         language_page_url = language["href"]
         language_resp = requests.get(language_page_url)
         laguage_soup_page = BeautifulSoup(language_resp.text, 'html.parser')
@@ -56,12 +56,15 @@ def crawl_wiki(
             language["title"].split(" — ")[1]
         ] = serialize_page_version(language_page_url, laguage_soup_page)
 
-    with open(resp_json, "w") as output:
-        json.dump(response_data, output, indent=4, ensure_ascii=False)
+    article_id = db.articles.insert_one(response_data).inserted_id
+    print("Article id", article_id)
 
 
 if __name__ == "__main__":
-    import sys
+    import os
 
-    params = sys.argv[1:]
-    crawl_wiki(*params)
+    client = MongoClient('mongodb', 27017)
+    db = client.texts
+    page_url = os.environ["PAGE_URL"] or "https://ru.wikipedia.org/wiki/Веб-скрейпинг"
+
+    crawl_wiki(db, page_url)

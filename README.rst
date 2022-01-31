@@ -6,14 +6,12 @@ Setup
 -----
 Build an image -
 
-    `docker build -t crawler .`
+    `docker-compose build`
 
-Run it with default `url` / `filename`
+Run it with default `page_url`
 
-    `docker run --volume=/tmp:/app/data crawler`
+    `docker-compose up`
 
-or with passed ones
+or with passed `page_url`
 
-    `docker run --volume=/tmp:/app/data crawler https://ru.wikipedia.org/wiki/Веб data/wiki.json`
-
-You will find your json files in `/tmp` folder.
+    `PAGE_URL=https://ru.wikipedia.org/wiki/Веб docker-compose up`

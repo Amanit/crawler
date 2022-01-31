@@ -1,0 +1,22 @@
+version: '3.4'
+
+services:
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-volume:/data/db
+  web:
+    stdin_open: true
+    tty: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["python", "/app/main.py"]
+    environment:
+      - "PAGE_URL=${PAGE_URL}"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mongodb
